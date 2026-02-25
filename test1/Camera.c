@@ -5,6 +5,5 @@ void main()
 {
 	c_pan(30);
 	printf("wow");
-	
 	return 0;
 }
