@@ -6,8 +6,11 @@ void c_pan(int degrees);
 void c_tilt(int degrees);
 int c_setup();
 void c_set_ip(char ip[]);
+void c_set_password(char user_password[]);
 static CURL* curl;
 static char ip_adress[16];
+static char password[16];
+
 
 #if defined(CAMERA_IMPLEMENTATION)
 int c_setup() {
@@ -18,21 +21,40 @@ int c_setup() {
 
 	return 0;
 }
+//funkar med värden från -360 till 360.
 void c_pan(int degrees) {
 	CURLcode result;
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "http://%s/axis-cgi/com/ptz.cgi?pan=%d&camera=1", ip_adress, degrees);
 	curl_easy_setopt(curl, CURLOPT_URL, buffer);
+	curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+	curl_easy_setopt(curl, CURLOPT_USERPWD, password);
 	result = curl_easy_perform(curl);
 	if (result != CURLE_OK)
 	{
 		printf("%s\n", curl_easy_strerror(result));
 	}
 }
+//c_tilt funkar bara mellan 0 och 90. Allt över 90 blir 90, och allt under 0 blir 0.
 void c_tilt(int degrees) {
-
+	CURLcode result;
+	char buffer[128];
+	snprintf(buffer, sizeof(buffer), "http://%s/axis-cgi/com/ptz.cgi?tilt=%d&camera=1", ip_adress, degrees);
+	curl_easy_setopt(curl, CURLOPT_URL, buffer);
+	curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+	curl_easy_setopt(curl, CURLOPT_USERPWD, password);
+	result = curl_easy_perform(curl);
+	if (result != CURLE_OK)
+	{
+		printf("%s\n", curl_easy_strerror(result));
+	}
 }
+// Uppdaterar ip:n, där ip:n är en string (char[])
 void c_set_ip(char ip[]) {
-	strcpy(ip_adress, ip);
+	strcpy_s(ip_adress, sizeof(ip_adress), ip);
+}
+// Uppdaterar lösenordet, där lösenordet är en string (char[])
+void c_set_password(char user_password[]) {
+	strcpy_s(password, sizeof(password), user_password);
 }
 #endif
