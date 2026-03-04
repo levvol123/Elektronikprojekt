@@ -14,6 +14,7 @@ static CURL* curl;
 static char ip_adress[16];
 static char password[16];
 
+//setup för curl, bör köras en gång i början av koden.
 int c_setup() {
 	curl = curl_easy_init();
 	if (!curl) {
@@ -22,6 +23,7 @@ int c_setup() {
 
 	return 0;
 }
+//cleanup av curl, friar minnet.
 void c_exit() {
 	curl_easy_cleanup(curl);
 }
