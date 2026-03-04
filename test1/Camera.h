@@ -7,12 +7,12 @@ void c_tilt(int degrees);
 int c_setup();
 void c_set_ip(char ip[]);
 void c_set_password(char user_password[]);
-
+void c_exit();
 
 #if defined(CAMERA_IMPLEMENTATION)
 static CURL* curl;
 static char ip_adress[16];
-static char password[16];
+static char password[64];
 
 //setup för curl, bör köras en gång i början av koden.
 int c_setup() {
