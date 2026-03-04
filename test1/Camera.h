@@ -7,12 +7,13 @@ void c_tilt(int degrees);
 int c_setup();
 void c_set_ip(char ip[]);
 void c_set_password(char user_password[]);
+
+
+#if defined(CAMERA_IMPLEMENTATION)
 static CURL* curl;
 static char ip_adress[16];
 static char password[16];
 
-
-#if defined(CAMERA_IMPLEMENTATION)
 int c_setup() {
 	curl = curl_easy_init();
 	if (!curl) {
@@ -20,6 +21,9 @@ int c_setup() {
 	}
 
 	return 0;
+}
+void c_exit() {
+	curl_easy_cleanup(curl);
 }
 //funkar med värden från -360 till 360.
 void c_pan(int degrees) {
@@ -51,7 +55,8 @@ void c_tilt(int degrees) {
 }
 // Uppdaterar ip:n, där ip:n är en string (char[])
 void c_set_ip(char ip[]) {
-	strcpy_s(ip_adress, sizeof(ip_adress), ip);
+	strcpy_s(ip_adress, sizeof(ip_adress), ip); //kanske inte funkar på raspberry pi, vi får se!
+	//strcpy(ip_adress, ip);
 }
 // Uppdaterar lösenordet, där lösenordet är en string (char[])
 void c_set_password(char user_password[]) {
