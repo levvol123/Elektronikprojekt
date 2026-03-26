@@ -58,13 +58,15 @@ void c_tilt(int degrees) {
 }
 // Uppdaterar ip:n, där ip:n är en string (char[])
 void c_set_ip(char ip[]) {
-	strcpy_s(ip_adress, sizeof(ip_adress), ip); //kanske inte funkar på raspberry pi, vi får se! 
+	//strcpy_s(ip_adress, sizeof(ip_adress), ip); //kanske inte funkar på raspberry pi, vi får se! 
 	//Kanske också lägga till att vi checkar returnvalue av strcpy för att se om vi får felmeddelanden
-	//strcpy(ip_adress, ip);
+	strcpy(ip_adress, ip);
 }
 // Uppdaterar lösenordet, där lösenordet är en string (char[])
 void c_set_password(char user_password[]) {
-	strcpy_s(password, sizeof(password), user_password);
+	//strcpy_s(password, sizeof(password), user_password);
+	strcpy(password, user_password);
+
 }
 #endif //CAMERA_IMPLEMENTATION
 
