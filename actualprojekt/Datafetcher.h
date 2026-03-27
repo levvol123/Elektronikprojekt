@@ -3,7 +3,7 @@
 
 int f_configure(int samplerate);
 
-void f_start_loop()
+void f_start_loop();
 
 static void* f_loop();
 
