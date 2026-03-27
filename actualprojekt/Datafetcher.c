@@ -1,5 +1,4 @@
 #include "Datafetcher.h"
-#include "ADS1263.h"
 #include <pthread.h> //https://pubs.opengroup.org/onlinepubs/7908799/xsh/pthread.h.html
 
 static pthread_t adc_thread;
@@ -19,8 +18,9 @@ void f_start_loop() {
 static void* f_loop() {
 	//fetcha från adc när DRDY = 0
 	//skriv till någon buffer
+	return NULL;
 }
 void f_exception_handler() {
 	DEV_Module_Exit();
-	exit(0);
+	//exit(0);
 }

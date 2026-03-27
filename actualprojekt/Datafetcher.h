@@ -1,7 +1,9 @@
-#ifndef Datafetcher.h
-#define Datafetcher.h
+#ifndef DATAFETCHER_H
+#define DATAFETCHER_H
+#include "ADS1263.h"
 
-int f_configure(int samplerate);
+
+int f_configure(ADS1263_DRATE samplerate);
 
 void f_start_loop();
 
