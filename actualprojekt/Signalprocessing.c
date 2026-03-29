@@ -31,7 +31,7 @@ float cross_correlation(int* v1, int* v2, int length) {
                 best_index = current_padding;
                 best_sum = sum;
             }
-            padd_zero(v2);
+            padd_zero(v2, length);
         }
     } else {
         for (int current_padding = 0; current_padding < max_padding; current_padding++) {
@@ -39,8 +39,11 @@ float cross_correlation(int* v1, int* v2, int length) {
             for (int i = 0; i < length-1; i++) {
                 sum += v1[i]*v2[i];
             }
-            result[current_padding] = sum;
-            padd_zero(v1);
+            if (sum > best_sum) {
+                best_index = current_padding;
+                best_sum = sum;
+            }
+            padd_zero(v1, length);
         }
     }
 
