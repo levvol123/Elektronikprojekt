@@ -12,8 +12,8 @@ int max(int* v, int length) {
 }
 
 int* padd_zero(int* v, int length) {
-    for (int i=(length-1); i < 0; i--){
-        if (i=0){
+    for (int i=(length-1); i >= 0; i--){
+        if (i==0){
             v[0]=0;
         }
         else{
@@ -33,10 +33,9 @@ float cross_correlation(int* v1, int* v2, int length) {
     int m_v1 = max(v1, length);
     int m_v2 = max(v2, length);
     if (m_v1 <= m_v2) {
-        printf("v1 är mindre än v2");
         for (int current_padding = 0; current_padding < max_padding; current_padding++) {
             int sum = 0;
-            for (int i = 0; i < length-1; i++) {
+            for (int i = 0; i < length; i++) {
                 sum += v1[i]*v2[i];
             }
             if (sum > best_sum) {
@@ -46,10 +45,9 @@ float cross_correlation(int* v1, int* v2, int length) {
             padd_zero(v2, length);
         }
     } else {
-        printf("v2 är mindre än v1");
         for (int current_padding = 0; current_padding < max_padding; current_padding++) {
             int sum = 0;
-            for (int i = 0; i < length-1; i++) {
+            for (int i = 0; i < length; i++) {
                 sum += v1[i]*v2[i];
             }
             if (sum > best_sum) {
@@ -64,13 +62,19 @@ float cross_correlation(int* v1, int* v2, int length) {
 }
 
 double calculate_angle(float delta_time) {
-    float c = 340; //ljudhastighet
-    float d = 0.01; //avstånd mellan mikrofoner
-    return asin((double) (c*delta_time)/d)*180/3.1415926;
+    const double c = 340.0;
+    const double d = 0.01;
+    double ratio = (c * delta_time) / d;
+    if (ratio > 1.0) ratio = 1.0;
+    if (ratio < -1.0) ratio = -1.0;
+    return asin(ratio) * 180.0 / 3.14159265;
 }
 
 int main() {
     int vector1[7] = {0, 0, 1, 3, 5, 2, 0};
     int vector2[7] = {2, 4, 6, 2, 0, 0, 0};
-    printf("%f", cross_correlation(vector1, vector2, 7));
+    float delta_time = cross_correlation(vector1, vector2, 7);
+    double angle = calculate_angle(delta_time);
+    printf("delta_time = %.3f s, angle = %.2f°\n", delta_time, angle);
+    return 0;
 }
