@@ -1,10 +1,18 @@
 #include "Datafetcher.h"
 #include <pthread.h> //https://pubs.opengroup.org/onlinepubs/7908799/xsh/pthread.h.html
+#include <stdatomic.h>
+
+#define BUFFER_SIZE 128
 
 static int current_state;
 static int previous_state;
 
 static pthread_t adc_thread;
+
+static Sample circular_buffer[BUFFER_SIZE];
+
+static atomic_int head = 0;
+static atomic_int tail = 0;
 
 int f_configure(ADS1263_DRATE samplerate) {
 	DEV_Module_Init();
@@ -24,15 +32,18 @@ static void* f_loop() {
 	while(1){
 		current_state = DEV_Digital_Read(DEV_DRDY_PIN);
 		if(current_state == 0 && previous_state == 1){
-			//skriv till buffer
+			circular_buffer[head].samples[0] = ADS1263_GetChannalValue(0); //Läs från GPIO och skriv till buffer
+			circular_buffer[head].samples[1] = ADS1263_GetChannalValue(1);
+			circular_buffer[head].samples[2] = ADS1263_GetChannalValue(2);
+			atomic_store(&head, (head +1) % BUFFER_SIZE); //increment head
 		} 
 		previous_state = current_state;
 	}
-	//fetcha från adc när DRDY = 0
-	//skriv till någon buffer
 	return NULL;
 }
 void f_exception_handler() {
 	DEV_Module_Exit();
 	//exit(0);
 }
+
+//fixa funktion för att Singalprocessing.c kan få tag på den senaste samplen.
