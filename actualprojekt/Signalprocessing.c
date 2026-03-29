@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <math.h>
 
-int* padd_zero(int* v) {
-
+int* padd_zero(int* v, int length) {
+    for (int i=(length-1); i < 0; i--){
+        if (i=0){
+            v[0]=0;
+        }
+        else{
+            v[i]=v[i-1];
+        }
+    }
 }
 
 float cross_correlation(int* v1, int* v2, int length) {
@@ -19,7 +26,7 @@ float cross_correlation(int* v1, int* v2, int length) {
                 sum += v1[i]*v2[i];
             }
             result[current_padding] = sum;
-            padd_zero(v2);
+            padd_zero(v2, length);
         }
         
     }
@@ -30,7 +37,7 @@ float cross_correlation(int* v1, int* v2, int length) {
                 sum += v1[i]*v2[i];
             }
             result[current_padding] = sum;
-            padd_zero(v1);
+            padd_zero(v1, length);
         }
     }
 
