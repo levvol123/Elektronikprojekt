@@ -1,11 +1,40 @@
 #include <stdio.h>
 #include <math.h>
 
+int* padd_zero(int* v) {
 
-float calculate_delta_time() {
-    
 }
 
+float cross_correlation(int* v1, int* v2, int length) {
+    float max_delta_time = 0; //ÄNDRA!!!!
+    float t_sample = 0;
+    int max_padding = max_delta_time/t_sample;
+    int result[max_padding];
+    int m_v1 = max(v1);
+    int m_v2 = max(v2);
+    if (m_v1 <= m_v2) {
+        for (int current_padding = 0; current_padding < max_padding; current_padding++) {
+            int sum = 0;
+            for (int i = 0; i < length-1; i++) {
+                sum += v1[i]*v2[i];
+            }
+            result[current_padding] = sum;
+            padd_zero(v2);
+        }
+        
+    }
+    else {
+        for (int current_padding = 0; current_padding < max_padding; current_padding++) {
+            int sum = 0;
+            for (int i = 0; i < length-1; i++) {
+                sum += v1[i]*v2[i];
+            }
+            result[current_padding] = sum;
+            padd_zero(v1);
+        }
+    }
+
+}
 
 double calculate_angle(float delta_time) {
     float c = 340; //ljudhastighet
@@ -13,10 +42,8 @@ double calculate_angle(float delta_time) {
     return asin((double) (c*delta_time)/d)*180/3.1415926;
 }
 
-
 int main() {
-    float t1 = 0.00001;
-    float t2 = 0.00003;
-    float d_t = t2 - t1;
-    printf("%lf\n", calculate_angle(d_t));
+    int* vector1 = {0, 0, 1, 3, 5, 2, 0};
+    int* vector2 = {2, 4, 6, 2, 0, 0, 0};
+
 }
