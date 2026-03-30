@@ -12,8 +12,13 @@ static void* f_loop();
 
 void f_exception_handler();
 
+
+
 typedef struct {
 	float samples[NUMBER_OF_CHANNELS]; 
 } Sample; //Struct för ett set av samples (vid tid t)
+
+int get_latest_sample(Sample* latest_sample);
+
 
 #endif // !Datafetcher.h

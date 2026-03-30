@@ -45,5 +45,13 @@ void f_exception_handler() {
 	DEV_Module_Exit();
 	//exit(0);
 }
-
-//fixa funktion för att Singalprocessing.c kan få tag på den senaste samplen.
+int get_latest_sample(Sample* latest_sample){
+	if(atomic_load(&head) == tail){
+		return 0; //inga nya samples
+	}
+	else{
+		*latest_sample = circular_buffer[tail];
+		atomic_store(&tail, (tail +1) % BUFFER_SIZE); //increment tail
+		return 1;
+	}
+}
