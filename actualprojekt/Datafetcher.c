@@ -13,6 +13,8 @@ static Sample circular_buffer[BUFFER_SIZE];
 
 static atomic_int head = 0;
 static atomic_int tail = 0;
+static void* f_loop();
+
 
 int f_configure(ADS1263_DRATE samplerate) {
 	DEV_Module_Init();
