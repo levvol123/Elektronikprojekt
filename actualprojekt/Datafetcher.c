@@ -55,3 +55,22 @@ int get_latest_sample(Sample* latest_sample){
 		return 1;
 	}
 }
+int get_copy_of_buffer(Sample* sample_array){
+
+	int current_head = atomic_load(&head);
+	int avaliable_samples = (current_head - tail + BUFFER_SIZE) % BUFFER_SIZE;
+	if(avaliable_samples < BUFFER_SIZE){
+		return 0; //inga nya samples
+	}
+
+	if(tail < current_head){
+		memcpy(sample_array, &circular_buffer[current_head], avaliable_samples * sizeof(Sample));
+	}
+	else{
+		int first_chunk = BUFFER_SIZE - tail;
+		int second_chunk = current_head;
+		memcpy(sample_array, &circular_buffer[tail], first_chunk * sizeof(Sample));
+		memcpy(sample_array, &circular_buffer[0], second_chunk * sizeof(Sample));
+	}
+	return 1;
+}
