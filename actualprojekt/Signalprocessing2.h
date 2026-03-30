@@ -2,7 +2,7 @@
 #define SIGNALPROCESSING2_H
 #include "Datafetcher.h"
 
-int create_array(Sample SampleArray[]);
+void create_array(Sample SampleArray[]);
 
 int find_index(int mic[]);
 

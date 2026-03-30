@@ -27,8 +27,8 @@ int find_index(int mic[]){
         if (mic[i]==1){
             return i;
         }
-        return -1;
     }
+    return -1;
 }
 
 double calculate_angle(int mic1[], int mic2[]){
