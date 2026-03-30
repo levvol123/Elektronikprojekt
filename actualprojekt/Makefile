@@ -8,3 +8,6 @@ CFLAGS = -Wall -Wextra -pthread -I./lib/Driver -I./lib/Config
 
 Datafetcher.o:
 	$(CC) $(CFLAGS) -c Datafetcher.c -o /dev/null
+
+Signalprocessing2.o:
+	$(CC) $(CFLAGS) -c Signalprocessing2.c -o /dev/null
