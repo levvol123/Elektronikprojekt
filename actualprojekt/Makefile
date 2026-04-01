@@ -11,3 +11,5 @@ Datafetcher.o:
 
 Signalprocessing2.o:
 	$(CC) $(CFLAGS) -c Signalprocessing2.c -o /dev/null
+Main.o:
+	$(CC) $(CFLAGS) -c Main.c -o /dev/null
