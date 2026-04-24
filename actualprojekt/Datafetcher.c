@@ -3,9 +3,11 @@
 #include <stdatomic.h>
 
 #define BUFFER_SIZE 128
+#define CHIP_PATH "/dev/gpiochip0"
 
 static int current_state;
 static int previous_state;
+static unsigned int pins[3] = {1,2,3};
 
 static pthread_t adc_thread;
 
@@ -15,14 +17,20 @@ static atomic_int head = 0;
 static atomic_int tail = 0;
 static void* f_loop();
 
+struct gpiod_line_bulk bulk_lines;
 
-int f_configure(ADS1263_DRATE samplerate) {
-	DEV_Module_Init();
-	ADS1263_SetMode(0);
-	if (ADS1263_init_ADC1(samplerate) == 1) {
-		f_exception_handler();
+
+int f_configure(int samplerate) {
+	struct gpiod_chip *chip = gpiod_chip_open(CHIP_PATH);
+	if (chip == NULL) {
+		f_exception_handler(chip);
 		return 1;
-	}
+	}	
+	gpiod_chip_get_lines(chip,pins,3, &bulk_lines); // flytta lines till ett bulk objekt. (struct)
+	if(gpiod_line_request_bulk_input(&bulk_lines,"Camera") == -1){
+		perror("gpiod_line_request_bulk_input fukar inte");
+		f_exception_handler(chip);
+	}; //sätt bulk struct till input mode.
 	return 0;
 }
 void f_start_loop() {
@@ -32,7 +40,7 @@ void f_start_loop() {
 }
 static void* f_loop() {
 	while(1){
-		current_state = DEV_Digital_Read(DEV_DRDY_PIN);
+		//current_state = DEV_Digital_Read(DEV_DRDY_PIN);
 		if(current_state == 0 && previous_state == 1){
 			circular_buffer[head].samples[0] = ADS1263_GetChannalValue(0); //Läs från GPIO och skriv till buffer
 			circular_buffer[head].samples[1] = ADS1263_GetChannalValue(1);
@@ -43,8 +51,8 @@ static void* f_loop() {
 	}
 	return NULL;
 }
-void f_exception_handler() {
-	DEV_Module_Exit();
+void f_exception_handler(struct gpiod_chip *chip) {
+	gpiod_chip_close(chip);
 	//exit(0);
 }
 int get_latest_sample(Sample* latest_sample){
