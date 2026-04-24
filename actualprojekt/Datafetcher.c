@@ -1,13 +1,16 @@
 #include "Datafetcher.h"
 #include <pthread.h> //https://pubs.opengroup.org/onlinepubs/7908799/xsh/pthread.h.html
 #include <stdatomic.h>
+#include <time.h>
+#include <string.h>
 
 #define BUFFER_SIZE 128
 #define CHIP_PATH "/dev/gpiochip0"
+#define NUMBER_OF_PINS 3
 
-static int current_state;
-static int previous_state;
-static unsigned int pins[3] = {1,2,3};
+static int samplerate;
+static long interval;
+static unsigned int pins[NUMBER_OF_PINS] = {1,2,3};
 
 static pthread_t adc_thread;
 
@@ -18,36 +21,39 @@ static atomic_int tail = 0;
 static void* f_loop();
 
 struct gpiod_line_bulk bulk_lines;
+struct gpiod_chip *chip = NULL;
 
-
-int f_configure(int samplerate) {
-	struct gpiod_chip *chip = gpiod_chip_open(CHIP_PATH);
+int f_configure(int samplerate_hz) {
+	samplerate = samplerate_hz;
+	interval = 1000000000L / samplerate;
+	chip = gpiod_chip_open(CHIP_PATH);
 	if (chip == NULL) {
 		f_exception_handler(chip);
 		return 1;
-	}	
-	gpiod_chip_get_lines(chip,pins,3, &bulk_lines); // flytta lines till ett bulk objekt. (struct)
+	}
+	gpiod_chip_get_lines(chip,pins,NUMBER_OF_PINS, &bulk_lines); // flytta lines till ett bulk objekt. (struct)
 	if(gpiod_line_request_bulk_input(&bulk_lines,"Camera") == -1){
-		perror("gpiod_line_request_bulk_input fukar inte");
 		f_exception_handler(chip);
+		return 1;
 	}; //sätt bulk struct till input mode.
 	return 0;
 }
 void f_start_loop() {
-	current_state = 1;
-	previous_state = 1;
 	pthread_create(&adc_thread, NULL, f_loop, NULL);
 }
 static void* f_loop() {
+	struct timespec next;
+    clock_gettime(CLOCK_MONOTONIC, &next);
 	while(1){
-		//current_state = DEV_Digital_Read(DEV_DRDY_PIN);
-		if(current_state == 0 && previous_state == 1){
-			circular_buffer[head].samples[0] = ADS1263_GetChannalValue(0); //Läs från GPIO och skriv till buffer
-			circular_buffer[head].samples[1] = ADS1263_GetChannalValue(1);
-			circular_buffer[head].samples[2] = ADS1263_GetChannalValue(2);
-			atomic_store(&head, (head +1) % BUFFER_SIZE); //increment head
-		} 
-		previous_state = current_state;
+		gpiod_line_get_value_bulk(&bulk_lines, circular_buffer[head].samples);//Läs från GPIO och skriv till buffer
+		atomic_store(&head, (head +1) % BUFFER_SIZE); //increment head
+
+		next.tv_nsec += interval;
+        if (next.tv_nsec >= 1000000000L) {   
+            next.tv_nsec -= 1000000000L;
+            next.tv_sec++;
+        }
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next, NULL); //sleepsak från claude. 
 	}
 	return NULL;
 }
