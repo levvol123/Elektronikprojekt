@@ -1,17 +1,17 @@
 #ifndef DATAFETCHER_H
 #define DATAFETCHER_H
-#include "ADS1263.h"
+#include <gpiod.h>
 
 #define NUMBER_OF_CHANNELS 3
 
-int f_configure(ADS1263_DRATE samplerate);
+int f_configure(int samplerate_hz);
 
 void f_start_loop();
 
-void f_exception_handler();
+void f_exception_handler(struct gpiod_chip *chip);
 
 typedef struct {
-	float samples[NUMBER_OF_CHANNELS]; 
+	int samples[NUMBER_OF_CHANNELS]; 
 } Sample; //Struct för ett set av samples (vid tid t)
 
 int get_latest_sample(Sample* latest_sample);
