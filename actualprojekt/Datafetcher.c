@@ -58,7 +58,6 @@ int f_configure(int samplerate_hz) {
 		f_exception_handler(chip);
 		return 1;
 	}
-
 	return 0;
 }
 
