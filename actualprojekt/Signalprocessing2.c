@@ -8,11 +8,11 @@
 // en sample så får jag in en 1 eller 0 från alla tre signaler. Sen måste jag själv bygga upp tre vekoterer av detta. Sample är def i datafetcher.h
 Sample SampleArray[SAMPLES];
 //När jag skapar mina micar så måste jag hämta från Levs data, plocka varje rad. 
-int mic1[SAMPLES];
-int mic2[SAMPLES];
-int mic3[SAMPLES];
+//int mic1[SAMPLES];
+//int mic2[SAMPLES];
+//int mic3[SAMPLES];
 const double speed_of_sound = 340.0;
-const double microphone_distance = 0.01;
+const double microphone_distance = 0.1;
 const double conversion_constant = 180.0/ M_PI;
 
 
