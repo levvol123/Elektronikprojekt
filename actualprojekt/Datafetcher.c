@@ -54,7 +54,7 @@ int f_configure(int samplerate_hz) {
 	gpiod_request_config_free(req_cfg);
 
 	if (request == NULL) {
-		perror("Failed to request lines");
+		//perror("Failed to request lines");
 		f_exception_handler(chip);
 		return 1;
 	}
@@ -92,7 +92,7 @@ void f_exception_handler(struct gpiod_chip *chip) {
 	if (chip != NULL) {
 		gpiod_chip_close(chip);
 	}
-	exit(0);
+	//exit(0);
 }
 
 int get_latest_sample(Sample* latest_sample){
