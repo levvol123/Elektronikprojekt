@@ -12,4 +12,8 @@ void rotate_camera_loop();
 
 void init_signalprocessing();
 
+double calculate_angle_using_dt(double dt);
+int find_index_sample_array(int microphone);
+
+
 #endif // !Datafetcher.h
