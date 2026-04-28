@@ -65,7 +65,6 @@ void rotate_camera_loop(){
 }
 void init_signalprocessing(){
     //bla bla bla
-    //Det som är kvar att göra är att hämnta varje rad från Levs matris och skapa konstanter av dem. 
-    
+    //Det som är kvar att göra är att hämnta varje rad från Levs matris och skapa konstanter av dem.  
 }
 
