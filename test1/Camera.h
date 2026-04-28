@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 void c_pan(int degrees);
 void c_tilt(int degrees);
 int c_setup();
