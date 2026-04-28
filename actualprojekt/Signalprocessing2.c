@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "Signalprocessing2.h"
+#include "Camera.h"
  //kan behöva samla in en del samples för att se när signalen börjar och slutar men det blir samma princip. 
 #define SAMPLES 128
  //Hitta den som är störst av de två signalera för att veta hur ska ska subtrahera. 
