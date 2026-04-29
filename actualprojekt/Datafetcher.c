@@ -3,6 +3,7 @@
 #include <stdatomic.h>
 #include <time.h>
 #include <string.h>
+#include <stdio.h>
 
 #define BUFFER_SIZE 128
 #define CHIP_PATH "/dev/gpiochip0"
@@ -58,6 +59,7 @@ int f_configure(int samplerate_hz) {
 		f_exception_handler(chip);
 		return 1;
 	}
+	printf("f_configure done\n");
 	return 0;
 }
 
@@ -69,6 +71,7 @@ void f_stop_loop(){
 }
 
 static void* f_loop() {
+	printf("Thread created\n");
 	struct timespec next;
 	clock_gettime(CLOCK_MONOTONIC, &next);
 	while(1){
@@ -87,6 +90,7 @@ static void* f_loop() {
 }
 
 void f_exception_handler(struct gpiod_chip *chip) {
+	printf("Exception\n");
 	if (request != NULL) {
 		gpiod_line_request_release(request); // v2: replaces gpiod_line_release_bulk
 		request = NULL;
