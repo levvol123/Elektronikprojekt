@@ -8,6 +8,8 @@ int f_configure(int samplerate_hz);
 
 void f_start_loop();
 
+void f_stop_loop();
+
 void f_exception_handler(struct gpiod_chip *chip);
 
 typedef struct {

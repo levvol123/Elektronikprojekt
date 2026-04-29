@@ -64,6 +64,9 @@ int f_configure(int samplerate_hz) {
 void f_start_loop() {
 	pthread_create(&adc_thread, NULL, f_loop, NULL);
 }
+void f_stop_loop(){
+	pthread_join(adc_thread, NULL);
+}
 
 static void* f_loop() {
 	struct timespec next;

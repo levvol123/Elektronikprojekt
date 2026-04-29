@@ -6,10 +6,11 @@
 int main() {
     printf("Initializing");
     f_configure(100);
-    //init singalprocessing2
+    init_signalprocessing();
     printf("Starting tasks");
     f_start_loop();
-    //starta signalprocessing2 loop?
+    rotate_camera_loop();
+    f_stop_loop();
 
     return 0;
 }
