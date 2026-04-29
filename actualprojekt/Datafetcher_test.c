@@ -55,4 +55,5 @@ int main(){
     printf("Starting tasks \n");
     f_start_loop();
     pthread_join(adc_thread, NULL);
+    printf("Allt funkar \n");
 }
