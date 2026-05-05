@@ -51,12 +51,18 @@ void rotate_camera_loop(){
         //printf("dt\n");
         double dt_1 = index_microphone0 - index_microphone1;
         //printf("dt1 klart\n");
-        double dt_2 = index_microphone1 - index_microphone2;
-        
+        //double dt_2 = index_microphone1 - index_microphone2;
+        double dt_2 = index_microphone0 - index_microphone2;
         //printf("Börjar kamera\n");
-        double angle = calculate_angle_using_dt(dt_1);
-        printf("Current angle: %lf", angle);
-        c_pan(angle); //phi
+        //double angle = calculate_angle_using_dt(dt_1);
+
+        double rx = -(speed_of_sound * dt_1) / microphone_distance;
+        double ry = -(speed_of_sound * dt_2) / microphone_distance;
+        double rz = sqrt(fmax(0, 1 - rx*rx - ry*ry));
+        c_pan(atan2(ry, rx));
+        c_tilt(asin(rz));
+        //printf("Current angle: %lf", angle);
+        //c_pan(angle); //phi
         //c_tilt(calculate_angle_using_dt(dt_2)); //theta
         //printf("Kamera klar\n");
     }
