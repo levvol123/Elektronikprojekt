@@ -5,13 +5,13 @@
 #include <string.h>
 #include <stdio.h>
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 4096
 #define CHIP_PATH "/dev/gpiochip0"
 #define NUMBER_OF_PINS 3
 
 static int samplerate;
 static long interval;
-static unsigned int pins[NUMBER_OF_PINS] = {23,24,25};
+static unsigned int pins[NUMBER_OF_PINS] = {24,25,23};
 
 static pthread_t adc_thread;
 
@@ -122,7 +122,7 @@ int get_latest_sample(Sample* latest_sample){
 int get_copy_of_buffer(Sample* sample_array){
 	int current_head = atomic_load(&head);
 	int avaliable_samples = (current_head - tail + BUFFER_SIZE) % BUFFER_SIZE;
-	printf("Avaliable samples: %d \n",avaliable_samples);
+	//printf("Avaliable samples: %d \n",avaliable_samples);
 	if(avaliable_samples == 0){
 		return 0; //inga nya samples
 
