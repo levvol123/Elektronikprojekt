@@ -11,7 +11,7 @@
 
 static int samplerate;
 static long interval;
-static unsigned int pins[NUMBER_OF_PINS] = {1,2,3};
+static unsigned int pins[NUMBER_OF_PINS] = {23,24,25};
 
 static pthread_t adc_thread;
 
@@ -75,10 +75,15 @@ static void* f_loop() {
 	struct timespec next;
 	clock_gettime(CLOCK_MONOTONIC, &next);
 	while(1){
+		
 		// v2: replaces gpiod_line_get_value_bulk
-		gpiod_line_request_get_values(request, circular_buffer[head].samples);
+		if(gpiod_line_request_get_values(request, circular_buffer[head].samples) == -1){
+			printf("Line Request Failed");
+		}
 		atomic_store(&head, (head +1) % BUFFER_SIZE); //increment head
-
+		//printf("Stored new sample\n");
+		//get_latest_sample(&test);
+		//printf("%ls", test.samples);
 		next.tv_nsec += interval;
 		if (next.tv_nsec >= 1000000000L) {
 			next.tv_nsec -= 1000000000L;
@@ -107,6 +112,8 @@ int get_latest_sample(Sample* latest_sample){
 	}
 	else{
 		*latest_sample = circular_buffer[tail];
+		printf("Getting latest sample\n");
+		printf("Head: %d, Tail: %d\n", atomic_load(&head), tail);
 		atomic_store(&tail, (tail +1) % BUFFER_SIZE); //increment tail
 		return 1;
 	}
@@ -115,18 +122,28 @@ int get_latest_sample(Sample* latest_sample){
 int get_copy_of_buffer(Sample* sample_array){
 	int current_head = atomic_load(&head);
 	int avaliable_samples = (current_head - tail + BUFFER_SIZE) % BUFFER_SIZE;
-	if(avaliable_samples < BUFFER_SIZE){
+	printf("Avaliable samples: %d \n",avaliable_samples);
+	if(avaliable_samples == 0){
 		return 0; //inga nya samples
+
 	}
 
 	if(tail < current_head){
-		memcpy(sample_array, &circular_buffer[current_head], avaliable_samples * sizeof(Sample));
-	}
-	else{
+		//printf("func 1\n");
+		//printf("DEBUG: tail=%d, head=%d, avaliable_samples=%d\n", tail, current_head, avaliable_samples);
+		memcpy(sample_array, &circular_buffer[tail], avaliable_samples * sizeof(Sample));
+		atomic_store(&tail, (tail + avaliable_samples) % BUFFER_SIZE); //increment tail
+		
+		//printf("DEBUG2: tail=%d, head=%d, avaliable_samples=%d\n", tail, current_head, avaliable_samples);
+	}else{
+		//printf("func 2\n");
 		int first_chunk = BUFFER_SIZE - tail;
 		int second_chunk = current_head;
 		memcpy(sample_array, &circular_buffer[tail], first_chunk * sizeof(Sample));
 		memcpy(sample_array + first_chunk, &circular_buffer[0], second_chunk * sizeof(Sample));
+		atomic_store(&tail, (tail + avaliable_samples) % BUFFER_SIZE);
 	}
+	//tail = (tail + avaliable_samples) % BUFFER_SIZE;
+	//printf("return\n");
 	return 1;
 }

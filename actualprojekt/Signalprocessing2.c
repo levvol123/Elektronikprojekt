@@ -76,23 +76,40 @@ double calculate_angle(int mic1[], int mic2[]){
 void rotate_camera_loop(){
     while (1)
     {
+        
         if (get_copy_of_buffer(SampleArray)==0){
-            return;
+            printf("Copy buffer failed\n");
+            continue;
+            
         }
+        
+        printf("Här: %d\n", SampleArray->samples[0]);
         int index_microphone0 = find_index_sample_array(0);
         int index_microphone1 = find_index_sample_array(1);
         int index_microphone2 = find_index_sample_array(2);
 
         if(index_microphone0 == -1 || index_microphone1 == -1|| index_microphone2 == -1){
-            printf("Saknas index");
+            printf("Saknas index\n");
+           
         }
+        if(index_microphone0 == -1 && index_microphone1 == -1&& index_microphone2 == -1){
+           
+            continue;
+        }
+        //printf("dt\n");
         double dt_1 = index_microphone0 - index_microphone1;
+        //printf("dt1 klart\n");
         double dt_2 = index_microphone1 - index_microphone2;
-    
+        
         //double angle_phi = calculate_angle(SampleArray->samples[0], SampleArray->samples[1]);
         //double angle_theta = calculate_angle(SampleArray->samples[1], SampleArray->samples[2]);
-        c_pan(calculate_angle_using_dt(dt_1)); //phi
-        c_tilt(calculate_angle_using_dt(dt_2)); //theta
+        //printf("Börjar kamera\n");
+        double angle = calculate_angle_using_dt(dt_1);
+        printf("Current angle: %lf", angle);
+        c_pan(angle); //phi
+        //printf("cpan klar\n");
+        //c_tilt(calculate_angle_using_dt(dt_2)); //theta
+        //printf("Kamera klar\n");
         //kolla på alla fall som kan bli fel
         //Lev funktion ger mig en matris med tre rader. Funkar index för detta?
     }
