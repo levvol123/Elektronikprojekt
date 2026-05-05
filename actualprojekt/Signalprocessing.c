@@ -1,80 +1,76 @@
 #include <stdio.h>
 #include <math.h>
 
-int max(int* v, int length) {
-    int max_value = v[0];
-    for (int i = 1; i < length; i++) {
-        if (v[i] > max_value) {
-            max_value = v[i];
+#define ITERATIONS 10000
+#define LEARNING_RATE 1e-7
+#define C 330.0
+
+double ax=0, ay=0;
+double bx=0, by=0;
+double cx=0, cy=0;
+double tb=0, tc=0;
+
+void residuals(double x0, double y0, double r, double res[3]) {
+    res[0] = (ax-x0)*(ax-x0) + (ay-y0)*(ay-y0) - r*r;
+
+    res[1] = (bx-x0)*(bx-x0) + (by-y0)*(by-y0) -
+             (r + C*tb)*(r + C*tb);
+
+    res[2] = (cx-x0)*(cx-x0) + (cy-y0)*(cy-y0) -
+             (r + C*tc)*(r + C*tc);
+}
+
+double cos_t(double x0, double y0, double r) {
+    double res[3];
+    residuals(x0,y0,r,res);
+
+    return res[0]*res[0] + res[1]*res[1] + res[2]*res[2];
+}
+
+void position_calculation_loop() {
+    while(1){
+        double x0 = 0;
+        double y0 = 0;
+        double r  = 1000;
+
+        if (get_copy_of_buffer(SampleArray)==0){
+            printf("Copy buffer failed\n");
+            continue;       
         }
+        
+        int index_microphone0 = find_index_sample_array(0);
+        int index_microphone1 = find_index_sample_array(1);
+        int index_microphone2 = find_index_sample_array(2);
+
+        if(index_microphone0 == -1 || index_microphone1 == -1|| index_microphone2 == -1){
+            printf("Saknas index\n");
+        }
+        if(index_microphone0 == -1 && index_microphone1 == -1&& index_microphone2 == -1){
+            continue;
+        }
+
+        if()
+
+        for(int i=0;i<ITERATIONS;i++) {
+
+            double eps = 1e-6;
+
+            double gx = (cos_t(x0+eps,y0,r)-cos_t(x0,y0,r))/eps;
+            double gy = (cos_t(x0,y0+eps,r)-cos_t(x0,y0,r))/eps;
+            double gr = (cos_t(x0,y0,r+eps)-cos_t(x0,y0,r))/eps;
+
+            x0 -= LEARNING_RATE * gx;
+            y0 -= LEARNING_RATE * gy;
+            r  -= LEARNING_RATE * gr;
+
+            if(r < 0){
+                r = 0;
+            }
+        }
+/*         printf("Solution:\n");
+        printf("x0 = %f\n",x0);
+        printf("y0 = %f\n",y0);
+        printf("r  = %f\n",r);
+ */
     }
-    return max_value;
-}
-
-int* padd_zero(int* v, int length) {
-    for (int i=(length-1); i >= 0; i--){
-        if (i==0){
-            v[0]=0;
-        }
-        else{
-            v[i]=v[i-1];
-        }
-    }
-}
-
-
-
-float cross_correlation(int* v1, int* v2, int length) {
-    float max_delta_time = 4; 
-    float t_sample = 1;
-    int max_padding = (int) max_delta_time/t_sample;
-    int best_padding = 0;
-    int best_sum = 0;
-    int m_v1 = max(v1, length);
-    int m_v2 = max(v2, length);
-    if (m_v1 <= m_v2) {
-        for (int current_padding = 0; current_padding < max_padding; current_padding++) {
-            int sum = 0;
-            for (int i = 0; i < length; i++) {
-                sum += v1[i]*v2[i];
-            }
-            if (sum > best_sum) {
-                best_padding = current_padding;
-                best_sum = sum;
-            }
-            padd_zero(v2, length);
-        }
-    } else {
-        for (int current_padding = 0; current_padding < max_padding; current_padding++) {
-            int sum = 0;
-            for (int i = 0; i < length; i++) {
-                sum += v1[i]*v2[i];
-            }
-            if (sum > best_sum) {
-                best_padding = current_padding;
-                best_sum = sum;
-            }
-            padd_zero(v1, length);
-        }
-    }
-    float delta_time = best_padding * t_sample;
-    return delta_time;
-}
-
-double calculate_angle(float delta_time) {
-    const double c = 340.0;
-    const double d = 0.01;
-    double ratio = (c * delta_time) / d;
-    if (ratio > 1.0) ratio = 1.0;
-    if (ratio < -1.0) ratio = -1.0;
-    return asin(ratio) * 180.0 / 3.14159265;
-}
-
-int main() {
-    int vector1[7] = {0, 0, 1, 3, 5, 2, 0};
-    int vector2[7] = {2, 4, 6, 2, 0, 0, 0};
-    float delta_time = cross_correlation(vector1, vector2, 7);
-    double angle = calculate_angle(delta_time);
-    printf("delta_time = %.3f s, angle = %.2f°\n", delta_time, angle);
-    return 0;
 }
