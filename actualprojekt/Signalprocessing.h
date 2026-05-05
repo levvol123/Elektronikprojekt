@@ -3,6 +3,7 @@
 #include "Datafetcher.h"
 
 void init_signalprocessing();
+int find_index_sample_array(int microphone);
 void residuals(double x0, double y0, double r, double res[3]);
 double cos_t(double x0, double y0, double r);
 void calculate_angle();

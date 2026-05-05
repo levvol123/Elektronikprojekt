@@ -21,6 +21,16 @@ void init_signalprocessing(){
     c_set_ip("169.254.45.199");
 }
 
+int find_index_sample_array(int microphone){
+    for (int i = 0; i < SAMPLES; i++)
+    {
+        if(SampleArray->samples[microphone] == 1){
+            return i;
+        }
+    }
+    return -1;
+}
+
 void residuals(double x0, double y0, double r, double res[3]) {
     res[0] = (ax-x0)*(ax-x0) + (ay-y0)*(ay-y0) - 
              (r + C*ta)*(r + C*ta);
