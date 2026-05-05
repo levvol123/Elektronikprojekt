@@ -80,10 +80,10 @@ static void* f_loop() {
 		if(gpiod_line_request_get_values(request, circular_buffer[head].samples) == -1){
 			printf("Line Request Failed");
 		}
+		//printf("Mic1: %d | Mic2: %d | Mic3 %d \n", 
+         //   circular_buffer[head].samples[0], circular_buffer[head].samples[1], circular_buffer[head].samples[2]);
 		atomic_store(&head, (head +1) % BUFFER_SIZE); //increment head
-		//printf("Stored new sample\n");
-		//get_latest_sample(&test);
-		//printf("%ls", test.samples);
+
 		next.tv_nsec += interval;
 		if (next.tv_nsec >= 1000000000L) {
 			next.tv_nsec -= 1000000000L;
@@ -125,7 +125,6 @@ int get_copy_of_buffer(Sample* sample_array){
 	//printf("Avaliable samples: %d \n",avaliable_samples);
 	if(avaliable_samples == 0){
 		return 0; //inga nya samples
-
 	}
 
 	if(tail < current_head){
@@ -146,4 +145,19 @@ int get_copy_of_buffer(Sample* sample_array){
 	//tail = (tail + avaliable_samples) % BUFFER_SIZE;
 	//printf("return\n");
 	return 1;
+}
+
+void get_full_buffer(Sample* sample_array){
+    int current_head = atomic_load(&head);
+    
+    if(current_head == 0){
+        // Buffer hasn't wrapped yet, just copy from 0 to head
+        memcpy(sample_array, &circular_buffer[0], current_head * sizeof(Sample));
+    } else {
+        // Copy in two chunks starting from head (oldest data) to get chronological order
+        int first_chunk = BUFFER_SIZE - current_head;
+        int second_chunk = current_head;
+        memcpy(sample_array, &circular_buffer[current_head], first_chunk * sizeof(Sample));
+        memcpy(sample_array + first_chunk, &circular_buffer[0], second_chunk * sizeof(Sample));
+    }
 }
