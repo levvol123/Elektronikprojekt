@@ -4,13 +4,14 @@
 #include <stdio.h>
 
 int main() {
-    printf("Initializing");
-    f_configure(100);
+    printf("Initializing\n");
+    f_configure(20000);
     init_signalprocessing();
-    printf("Starting tasks");
+    printf("Starting tasks\n");
     f_start_loop();
     rotate_camera_loop();
+    printf("Stopped camera loop");
     f_stop_loop();
-
+    printf("EXIT");
     return 0;
 }
