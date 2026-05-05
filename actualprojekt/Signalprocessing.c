@@ -66,6 +66,7 @@ void calculate_angle(){
             r = 0;
         }
     }
+    rotate_camera(x0,y0);
 }
 
 void rotate_camera(double x, double y){
