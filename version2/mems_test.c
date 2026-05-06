@@ -28,7 +28,7 @@ static int callback_function(const void *input,
     if (input == NULL){ //Om input är noll
         return paContinue;
     }
-    memcpy(local_buffer, input, sizeof(Sample)*BUFFER_SIZE);
+    memcpy(local_buffer, input_signal, sizeof(Sample)*frameCount);
     //kopiera data
     return paContinue;
 }
@@ -39,13 +39,13 @@ int main(){
     if( err != paNoError ){
         printf("PortAudio Init error: %s\n", Pa_GetErrorText(err));
     }
-    printf("PortAudio init success");
+    printf("PortAudio init success \n");
     
     /* Open an audio I/O stream. */
     err = Pa_OpenDefaultStream(&stream,
         2,          /* no input channels */
         0,          /* stereo output */
-        paFloat32,  /* 32 bit floating point output */
+        paInt32,  /* 32 bit floating point output */
         SAMPLE_RATE,
         BUFFER_SIZE,        /* frames per buffer, */
         callback_function, /* this is your callback function */
@@ -54,12 +54,12 @@ int main(){
     if( err != paNoError ){
         printf("PortAudio Open Stream error: %s\n", Pa_GetErrorText(err));
     }
-    printf("PortAudio Open Stream success");
+    printf("PortAudio Open Stream success \n");
     err = Pa_StartStream(stream);
         if( err != paNoError ){
         printf("PortAudio Start Stream error: %s\n", Pa_GetErrorText(err));
     }
-    printf("PortAudio Start Stream success");
+    printf("PortAudio Start Stream success \n");
 
     while (1)
     {
