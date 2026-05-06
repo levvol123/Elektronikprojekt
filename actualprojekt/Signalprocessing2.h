@@ -14,6 +14,7 @@ void init_signalprocessing();
 
 double calculate_angle_using_dt(double dt);
 int find_index_sample_array(int microphone);
+double calculate_angle_2(int index1, int index2, int index3);
 
 
 #endif // !Datafetcher.h

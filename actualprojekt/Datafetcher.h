@@ -20,5 +20,7 @@ int get_latest_sample(Sample* latest_sample);
 
 int get_copy_of_buffer(Sample* sample_array);
 
+void get_full_buffer(Sample* sample_array);
+
 
 #endif // !Datafetcher.h

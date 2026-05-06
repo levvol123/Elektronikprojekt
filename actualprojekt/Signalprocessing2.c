@@ -14,8 +14,7 @@ const double conversion_constant = 180.0/ M_PI;
 int find_index_sample_array(int microphone){
     for (int i = 0; i < SAMPLES; i++)
     {
-        if(SampleArray->samples[microphone] == 1){
-            printf("%d",i);
+        if(SampleArray[i].samples[microphone] == 1){
             return i;
         }
     }
@@ -31,27 +30,36 @@ double calculate_angle_using_dt(double dt){
 void rotate_camera_loop(){
     while (1)
     {        
-        if (get_copy_of_buffer(SampleArray)==0){
+/*         if (get_copy_of_buffer(SampleArray)==0){
             //printf("Copy buffer failed\n");
             continue;       
-        }
-        
-        //printf("Här: %d\n", SampleArray->samples[0]);
+        }  */
+        get_full_buffer(SampleArray);
         int index_microphone0 = find_index_sample_array(0);
         int index_microphone1 = find_index_sample_array(1);
         int index_microphone2 = find_index_sample_array(2);
+        
 
         if(index_microphone0 == -1 || index_microphone1 == -1|| index_microphone2 == -1){
             //printf("Saknas index\n");
-           
+           continue;
         }
         if(index_microphone0 == -1 && index_microphone1 == -1&& index_microphone2 == -1){
-           
             continue;
         }
+
+        printf("Audio angle: %lf | Index 1: %d | Index 2: %d | Index 3:%d \n", 
+            calculate_angle_2(index_microphone0,index_microphone1,index_microphone2)
+            , index_microphone0,index_microphone1,index_microphone2);
+        //printf("Index 1: %d | Index 2: %d | Index 3:%d \n", index_microphone0,index_microphone1,index_microphone2);
         //printf("dt\n");
+        // printf("Data: \n" );
+        // for (int i = 0; i < 40960; i++)
+        // {
+        //     printf("%d", SampleArray[i].samples[0]);
+        // }
+        // exit(0);
         double dt_1 = index_microphone0 - index_microphone1;
-        //printf("dt1 klart\n");
         //double dt_2 = index_microphone1 - index_microphone2;
         double dt_2 = index_microphone2 - index_microphone0;
         //printf("Börjar kamera\n");
@@ -70,12 +78,12 @@ void rotate_camera_loop(){
         } else{
             angle = 180 + asin(ds/microphone_distance)*conversion_constant;
         }
-        
+        //printf("Audio angle: %lf \n", angle);
         //printf("ds %lf\n", ds);
         //printf("Angle: %lf\n", angle);
-        c_pan(angle);
+        //c_pan(angle);
         //c_tilt(asin(rz)*conversion_constant);
-        c_tilt(0);
+        //c_tilt(0);
         //printf("Current angle: %lf", angle);
         //c_pan(angle); //phi
         //c_tilt(calculate_angle_using_dt(dt_2)); //theta
@@ -86,5 +94,13 @@ void init_signalprocessing(){
     c_setup();
     c_set_password("root:root");
     c_set_ip("169.254.45.199");
+}
+
+double calculate_angle_2(int index1, int index2, int index3){
+    double dt_12 = index1 - index2;
+    double dt_13 = index1 - index3; 
+    double rx = -(speed_of_sound * dt_12/20000) / microphone_distance;
+    double ry = -(speed_of_sound * dt_13/20000) / microphone_distance;
+    return atan2(ry,rx)*conversion_constant;
 }
 
