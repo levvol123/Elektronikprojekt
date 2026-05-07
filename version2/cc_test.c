@@ -6,18 +6,20 @@
 #include <math.h>
 #include <limits.h>
 #include <fftw3.h>
+#define CAMERA_IMPLEMENTATION
+#include "Camera.h"
 
 
 
 #define SAMPLE_RATE 48000
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 4096
 #define F_BUFFER_SIZE (2*BUFFER_SIZE)
 #define NUMBER_OF_CHANNELS 2
 PaStream *stream;
 PaError err;
 
 const float conversion_constant = 180.0/ M_PI;
-const float microphone_distance_meters = 0.15f;
+const float microphone_distance_meters = 0.1f;
 const float speed_of_sound = 343.0f;
 const float max_delay = microphone_distance_meters / speed_of_sound;
 
@@ -89,17 +91,20 @@ int main(){
     }
     printf("PortAudio Start Stream success \n");
     init_fftw();
-
+    c_setup();
+    c_set_password("root:root");
+    c_set_ip("169.254.45.199");
     while (1)
     {
         float angle = calculate_angle();
-        if(angle == -1)
+        if(angle == -1 || angle == 0)
         {
             continue;
         }
         
         printf("Angle : %f \n", angle);
-        Pa_Sleep(500);
+        c_pan(angle);
+        Pa_Sleep(200);
         //system("clear");
     }
 }
@@ -140,7 +145,7 @@ float calculate_angle(){
     }
     fclose(f1);
     fclose(f2);
-    exit(0);
+    //exit(0);
     //FILE *f2 = fopen("mic2.txt", "w");
     fftw_execute(plan1);// Calculate fft1
     fftw_execute(plan2);// Calculate fft2
@@ -169,6 +174,10 @@ float calculate_angle(){
     }
     //printf("Delay: %f\n", delay);
     float angle = asin(delay * speed_of_sound / microphone_distance_meters);  // radians
+    // if(angle != 0){
+    //     printf("%f",angle*conversion_constant);
+    //     exit(0);
+    // }
     return angle*conversion_constant; //degrees
 }
 
