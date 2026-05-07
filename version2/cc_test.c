@@ -130,12 +130,17 @@ float calculate_angle(){
         in1[i][0] = 0; in1[i][1] = 0;
         in2[i][0] = 0; in2[i][1] = 0;
     }
-    
+    FILE *f1 = fopen("mic1.csv", "w");
+    FILE *f2 = fopen("mic2.csv", "w");
     for (int i = 0; i < BUFFER_SIZE; i++) {
         in1[i][0] = mic1[i]; in1[i][1] = 0;
         in2[i][0] = mic2[i]; in2[i][1] = 0;
+        fprintf(f1,"%d, %d \n",i,mic1[i]);
+        fprintf(f2,"%d, %d \n",i,mic2[i]);
     }
-
+    fclose(f1);
+    fclose(f2);
+    //FILE *f2 = fopen("mic2.txt", "w");
     fftw_execute(plan1);// Calculate fft1
     fftw_execute(plan2);// Calculate fft2
     cross_correlate(F_BUFFER_SIZE);
