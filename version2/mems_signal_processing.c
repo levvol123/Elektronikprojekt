@@ -51,6 +51,7 @@ static void cross_correlate(int n) {
 }
 
 float calculate_angle(){
+    ready_for_calculation = 0;
     fftw_execute(microphone_1_plan);// Calculate fft1
     fftw_execute(microphone_2_plan);// Calculate fft2
     cross_correlate(F_BUFFER_SIZE);

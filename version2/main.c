@@ -24,7 +24,12 @@ int main(){
     while (1)
     {
         if(ready_for_calculation == 1){
-            c_pan(calculate_angle());
+            float angle = calculate_angle();
+            if(angle == -1 || angle == 0){
+                continue;
+            }
+            c_pan(angle);
+            Pa_Sleep(200);
         }
     }
     return 0;
@@ -91,7 +96,6 @@ static int callback_function(const void *input,
         return paContinue;
     }
     if(ready_for_calculation == 1){
-        ready_for_calculation = 0;
         load_data((int32_t*)input, frameCount);
         return paContinue;
     }
