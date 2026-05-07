@@ -7,6 +7,8 @@
 #include <limits.h>
 #include <fftw3.h>
 
+
+
 #define SAMPLE_RATE 48000
 #define BUFFER_SIZE 512
 #define F_BUFFER_SIZE (2*BUFFER_SIZE)
@@ -15,8 +17,9 @@ PaStream *stream;
 PaError err;
 
 const float conversion_constant = 180.0/ M_PI;
-const float microphone_distance_meters = 0.1f;
+const float microphone_distance_meters = 0.15f;
 const float speed_of_sound = 343.0f;
+const float max_delay = microphone_distance_meters / speed_of_sound;
 
 static int32_t mic1[BUFFER_SIZE];
 static int32_t mic2[BUFFER_SIZE];
@@ -154,8 +157,8 @@ float calculate_angle(){
     }
 
     float delay = (float)best_index/(float)SAMPLE_RATE;  // seconds
-    if(delay > 0.001f || delay < 0.001f){
-        printf("Stor delay\n");
+    if(delay > max_delay || delay < -max_delay){
+        //printf("Stor delay\n");
         return -1;
     }
     //printf("Delay: %f\n", delay);
