@@ -1,21 +1,26 @@
 #include <portaudio.h>
 #include <stdio.h>
 #include <string.h>
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <math.h>
+#include <limits.h>
 
-
-#define SAMPLE_RATE 2
-#define BUFFER_SIZE 10
+#define SAMPLE_RATE 48000
+#define BUFFER_SIZE 4096
 #define NUMBER_OF_CHANNELS 2
 PaStream *stream;
 PaError err;
 
+const float conversion_constant = 180.0/ M_PI;
+const float microphone_distance_meters = 0.1f;
+const float speed_of_sound = 343.0f;
 
-typedef struct {
-	int samples[NUMBER_OF_CHANNELS]; 
-} Sample; 
+static int32_t mic1[BUFFER_SIZE];
+static int32_t mic2[BUFFER_SIZE];
 
-static Sample local_buffer[BUFFER_SIZE];
+float calculate_angle();
+int cross_correlate(int32_t *mic1, int32_t *mic2, int n);
 
 static int callback_function(const void *input,
                             void *output,
@@ -24,12 +29,17 @@ static int callback_function(const void *input,
                             PaStreamCallbackFlags statusFlags,
                             void *userData )
 {
-    Sample *input_signal = (Sample*)input;
+    //Sample *input_signal = (Sample*)input;
     if (input == NULL){ //Om input är noll
         return paContinue;
     }
-    memcpy(local_buffer, input_signal, sizeof(Sample)*frameCount);
+    //memcpy(local_buffer, input_signal, sizeof(Sample)*frameCount);
     //kopiera data
+    int32_t *input_samples = (int32_t*)input;
+    for(int i = 0; i < frameCount; i++){
+        mic1[i] = input_samples[i * 2];      // even samples = channel 1
+        mic2[i] = input_samples[i * 2 + 1];  // odd samples = channel 2
+    }
     return paContinue;
 }
 
@@ -43,8 +53,8 @@ int main(){
     
     /* Open an audio I/O stream. */
     err = Pa_OpenDefaultStream(&stream,
-        2,          /* no input channels */
-        0,          /* stereo output */
+        2,          /* 2 input channels */
+        0,          /* no output */
         paInt32,  /* 32 bit floating point output */
         SAMPLE_RATE,
         BUFFER_SIZE,        /* frames per buffer, */
@@ -63,11 +73,40 @@ int main(){
 
     while (1)
     {
+
         for (int i = 0; i < BUFFER_SIZE; i++)
         {
-            printf("Channel 1: %d | Channel 2: %d \n", local_buffer[i].samples[0],local_buffer[i].samples[1]);
+            printf("Channel 1: %d | Channel 2: %d\n", 
+                mic1[i], mic2[i]);
         }
+        printf("Angle : %f \n", calculate_angle());
         Pa_Sleep(3000);
         system("clear");
     }
+}
+
+int cross_correlate(int32_t *mic1, int32_t *mic2, int n) { //claude
+    int best_lag = 0;
+    long long best_val = LLONG_MIN;
+
+    for (int lag = -(n-1); lag < n; lag++) {
+        long long sum = 0;
+        for (int i = 0; i < n; i++) {
+            int j = i + lag;
+            if (j >= 0 && j < n)
+                sum += (long long)mic1[i] * mic2[j];
+        }
+        if (sum > best_val) {
+            best_val = sum;
+            best_lag = lag;
+        }
+    }
+    return best_lag;  // in samples
+}
+
+float calculate_angle(){
+    int best_guess = cross_correlate(mic1,mic2, BUFFER_SIZE);
+    float delay = (float)best_guess / SAMPLE_RATE;  // seconds
+    float angle = acos(delay * speed_of_sound / microphone_distance_meters);  // radians
+    return angle*conversion_constant; //degrees
 }
