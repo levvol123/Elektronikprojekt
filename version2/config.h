@@ -1,0 +1,17 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define SAMPLE_RATE 48000
+#define BUFFER_SIZE 512
+#define F_BUFFER_SIZE (2*BUFFER_SIZE)
+
+#define CONVERSION_CONSTANT (180.0f / M_PI)
+#define MICROPHONE_DISTANCE_METERS 0.1f
+#define SPEED_OF_SOUND 343.0f
+#define MAX_DELAY (MICROPHONE_DISTANCE_METERS / SPEED_OF_SOUND)
+
+#ifndef M_PI //störigt felmeddelande annars
+#define M_PI 3.14159265358979323846
+#endif
+
+#endif //CONFIG_H
