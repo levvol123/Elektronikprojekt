@@ -79,8 +79,13 @@ int main(){
             printf("Channel 1: %d | Channel 2: %d\n", 
                 mic1[i], mic2[i]);
         }
-        printf("Angle : %f \n", calculate_angle());
-        Pa_Sleep(3000);
+        float angle = calculate_angle();
+        if(angle == -1)
+        {
+            continue;
+        }
+        printf("Angle : %f \n", angle);
+        Pa_Sleep(1000);
         system("clear");
     }
 }
@@ -106,6 +111,10 @@ int cross_correlate(int32_t *mic1, int32_t *mic2, int n) { //claude
 
 float calculate_angle(){
     int best_guess = cross_correlate(mic1,mic2, BUFFER_SIZE);
+    if(best_guess == 0){
+        printf("No match \n");
+        return -1;
+    }
     float delay = (float)best_guess / SAMPLE_RATE;  // seconds
     float angle = acos(delay * speed_of_sound / microphone_distance_meters);  // radians
     return angle*conversion_constant; //degrees
