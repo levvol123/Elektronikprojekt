@@ -110,6 +110,15 @@ int cross_correlate(int32_t *mic1, int32_t *mic2, int n) { //claude
 }
 
 float calculate_angle(){
+    long long energy = 0;
+    for(int i = 0; i < BUFFER_SIZE; i++)
+        energy += (long long)mic1[i] * mic1[i];
+    
+    printf("Energy: %lld\n", energy);  // add this temporarily
+    
+/*     if(energy < SOME_THRESHOLD){
+        return -1.0f;
+    } */
     int best_guess = cross_correlate(mic1,mic2, BUFFER_SIZE);
     if(best_guess == 0){
         printf("No match \n");
