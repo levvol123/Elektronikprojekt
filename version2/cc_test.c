@@ -140,6 +140,7 @@ float calculate_angle(){
     }
     fclose(f1);
     fclose(f2);
+    exit(0);
     //FILE *f2 = fopen("mic2.txt", "w");
     fftw_execute(plan1);// Calculate fft1
     fftw_execute(plan2);// Calculate fft2
