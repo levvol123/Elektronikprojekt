@@ -9,6 +9,7 @@
 
 #define SAMPLE_RATE 48000
 #define BUFFER_SIZE 512
+#define F_BUFFER_SIZE (2*BUFFER_SIZE)
 #define NUMBER_OF_CHANNELS 2
 PaStream *stream;
 PaError err;
@@ -24,17 +25,17 @@ float calculate_angle();
 void cross_correlate(int n);
 void init_fftw();
 
-fftw_complex in1[BUFFER_SIZE*2];
-fftw_complex out1[BUFFER_SIZE*2];
+fftw_complex in1[F_BUFFER_SIZE];
+fftw_complex out1[F_BUFFER_SIZE];
 fftw_plan plan1; 
 
-fftw_complex in2[BUFFER_SIZE*2];
-fftw_complex out2[BUFFER_SIZE*2];
+fftw_complex in2[F_BUFFER_SIZE];
+fftw_complex out2[F_BUFFER_SIZE];
 fftw_plan plan2; 
 
-fftw_complex cross_array[BUFFER_SIZE*2];
+fftw_complex cross_array[F_BUFFER_SIZE];
 fftw_plan plan_inverse;
-fftw_complex result[BUFFER_SIZE*2];
+fftw_complex result[F_BUFFER_SIZE];
 
 static int callback_function(const void *input,
                             void *output,
@@ -91,18 +92,16 @@ int main(){
         float angle = calculate_angle();
         if(angle == -1)
         {
-            printf("angle = -1\n");
             continue;
         }
         
         printf("Angle : %f \n", angle);
-        Pa_Sleep(200);
-        system("clear");
+        Pa_Sleep(500);
+        //system("clear");
     }
 }
 
 void cross_correlate(int n) { 
-    //printf("crossing\n");
     for (int i = 0; i < n; i++) {
         // Complex Conjugate Multiplication: (a+bi) * (c-di)
         double real = out1[i][0] * out2[i][0] + out1[i][1] * out2[i][1];
@@ -122,9 +121,8 @@ void cross_correlate(int n) {
 }
 
 float calculate_angle(){
-    //printf("angleing\n");
     // Load data into complex input arrays
-    for (int i = 0; i < BUFFER_SIZE*2; i++)
+    for (int i = 0; i < F_BUFFER_SIZE; i++)
     {
         in1[i][0] = 0; in1[i][1] = 0;
         in2[i][0] = 0; in2[i][1] = 0;
@@ -133,18 +131,17 @@ float calculate_angle(){
     for (int i = 0; i < BUFFER_SIZE; i++) {
         in1[i][0] = mic1[i]; in1[i][1] = 0;
         in2[i][0] = mic2[i]; in2[i][1] = 0;
-        //printf("%d\n",in1[i][0]);
     }
 
     fftw_execute(plan1);// Calculate fft1
     fftw_execute(plan2);// Calculate fft2
-    cross_correlate(BUFFER_SIZE*2);
+    cross_correlate(F_BUFFER_SIZE);
     fftw_execute(plan_inverse); // Calculate inverse
     int best_index = 0;
     double best_value = 0;
-    for(int i = 0; i< BUFFER_SIZE*2; i++){
-        result[i][0] /= BUFFER_SIZE*2;
-        result[i][1] /= BUFFER_SIZE*2;
+    for(int i = 0; i< F_BUFFER_SIZE; i++){
+        result[i][0] /= F_BUFFER_SIZE;
+        result[i][1] /= F_BUFFER_SIZE;
         double value = result[i][0]*result[i][0] + result[i][1]*result[i][1];
 
         if(value > best_value){
@@ -152,23 +149,23 @@ float calculate_angle(){
             best_index = i; 
         }
     }
-    if(best_index > BUFFER_SIZE){
-        best_index -= BUFFER_SIZE*2;
+    if(best_index > F_BUFFER_SIZE/2){
+        best_index -= F_BUFFER_SIZE;
     }
 
     float delay = (float)best_index/(float)SAMPLE_RATE;  // seconds
-    if(delay > 0.001){
+    if(delay > 0.001f || delay < 0.001f){
         printf("Stor delay\n");
         return -1;
     }
-    printf("Delay: %f\n", delay);
+    //printf("Delay: %f\n", delay);
     float angle = asin(delay * speed_of_sound / microphone_distance_meters);  // radians
     return angle*conversion_constant; //degrees
 }
 
 void init_fftw(){
-    plan1 = fftw_plan_dft_1d(BUFFER_SIZE*2, in1,out1, FFTW_FORWARD, FFTW_ESTIMATE);
-    plan2 = fftw_plan_dft_1d(BUFFER_SIZE*2, in2,out2, FFTW_FORWARD, FFTW_ESTIMATE);
-    plan_inverse = fftw_plan_dft_1d(BUFFER_SIZE*2, cross_array ,result, FFTW_BACKWARD, FFTW_ESTIMATE);
+    plan1 = fftw_plan_dft_1d(F_BUFFER_SIZE, in1,out1, FFTW_FORWARD, FFTW_ESTIMATE);
+    plan2 = fftw_plan_dft_1d(F_BUFFER_SIZE, in2,out2, FFTW_FORWARD, FFTW_ESTIMATE);
+    plan_inverse = fftw_plan_dft_1d(F_BUFFER_SIZE, cross_array ,result, FFTW_BACKWARD, FFTW_ESTIMATE);
     printf("Plan Created\n");
 }
