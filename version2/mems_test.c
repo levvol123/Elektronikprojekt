@@ -7,7 +7,7 @@
 #include <limits.h>
 
 #define SAMPLE_RATE 48000
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 512
 #define NUMBER_OF_CHANNELS 2
 PaStream *stream;
 PaError err;
@@ -125,6 +125,6 @@ float calculate_angle(){
         return -1;
     }
     float delay = (float)best_guess / SAMPLE_RATE;  // seconds
-    float angle = acos(delay * speed_of_sound / microphone_distance_meters);  // radians
+    float angle = asin(delay * speed_of_sound / microphone_distance_meters);  // radians
     return angle*conversion_constant; //degrees
 }
