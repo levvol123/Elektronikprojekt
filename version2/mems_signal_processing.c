@@ -3,6 +3,7 @@
 #include <semaphore.h>
 #include "config.h"
 #include "mems_signal_processing.h"
+#include "digital_mic_signal_processing.h"
 
 static fftw_complex microphone_1[F_BUFFER_SIZE];
 static fftw_complex microphone_1_fft[F_BUFFER_SIZE];
@@ -57,6 +58,7 @@ float calculate_angle(){
     fftw_execute(microphone_1_plan);// Calculate fft1
     fftw_execute(microphone_2_plan);// Calculate fft2
     sem_post(&data_semaphore);
+    save_calculation_buffer();
     cross_correlate(F_BUFFER_SIZE);
     fftw_execute(inverse_plan); // Calculate inverse
     int best_index = 0;
@@ -79,8 +81,24 @@ float calculate_angle(){
     if(delay > MAX_DELAY || delay < -MAX_DELAY){
         return -1;
     }
-    float angle = asin(delay * SPEED_OF_SOUND / MICROPHONE_DISTANCE_METERS);  // radians
-    return angle*CONVERSION_CONSTANT; //degrees
+    int direction = calculate_general_direction();
+    float angle = CONVERSION_CONSTANT*(delay * SPEED_OF_SOUND / MICROPHONE_DISTANCE_METERS);  //i grader
+    if (direction == 1)
+    {
+        return angle;
+    }
+    else if(direction == 0){
+        if (angle >= 0){
+            return 180.0f - angle;
+        }
+        else{
+            return -180.0f - angle;
+        }
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 void load_data(int32_t* input_samples, int n){

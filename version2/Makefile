@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
-LDLIBS = -lfftw3 -lm -lcurl -lportaudio -pthread
+LDLIBS = -lfftw3 -lm -lcurl -lportaudio -pthread -lgpiod
 
-OBJ = main.o mems_signal_processing.o
+OBJ = main.o mems_signal_processing.o digital_mic_signal_processing.o
 
 all: program
 

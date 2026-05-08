@@ -5,6 +5,7 @@
 #include "config.h"
 #include "mems_signal_processing.h"
 #include "main.h"
+#include "digital_mic_signal_processing.h"
 
 #define CAMERA_IMPLEMENTATION
 #include "Camera.h"
@@ -21,6 +22,8 @@ int main(){
     pa_initialize();
     camera_initialize();
     fft_initialize();
+    digital_mic_configure(20000);
+    f_start_loop();
     while (1)
     {
         float angle = calculate_angle();
@@ -30,6 +33,7 @@ int main(){
         c_pan(angle);
         Pa_Sleep(200);
     }
+    f_stop_loop();
     return 0;
 }
 
