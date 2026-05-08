@@ -30,6 +30,7 @@ int main(){
         if(angle == -1 || angle == 0){
             continue;
         }
+        printf("Total angle: %f", angle);
         c_pan(angle);
         Pa_Sleep(200);
     }

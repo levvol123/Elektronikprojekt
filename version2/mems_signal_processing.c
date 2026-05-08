@@ -83,6 +83,9 @@ float calculate_angle(){
     }
     int direction = calculate_general_direction();
     float angle = CONVERSION_CONSTANT*(delay * SPEED_OF_SOUND / MICROPHONE_DISTANCE_METERS);  //i grader
+    if(angle == 0){
+        return -1;
+    }
     if (direction == 1)
     {
         return angle;
