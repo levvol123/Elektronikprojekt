@@ -23,14 +23,12 @@ int main(){
     fft_initialize();
     while (1)
     {
-        if(ready_for_calculation == 1){
-            float angle = calculate_angle();
-            if(angle == -1 || angle == 0){
-                continue;
-            }
-            c_pan(angle);
-            Pa_Sleep(200);
+        float angle = calculate_angle();
+        if(angle == -1 || angle == 0){
+            continue;
         }
+        c_pan(angle);
+        Pa_Sleep(200);
     }
     return 0;
 }
@@ -95,11 +93,7 @@ static int callback_function(const void *input,
     if (input == NULL){ //Om input är noll
         return paContinue;
     }
-    if(ready_for_calculation == 1){
-        load_data((int32_t*)input, frameCount);
-        return paContinue;
-    }
-    else{
-        return paContinue;
-    }
+    load_data((int32_t*)input, frameCount);
+    return paContinue;
+
 }

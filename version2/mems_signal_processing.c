@@ -1,5 +1,6 @@
 #include <fftw3.h>
 #include <math.h>
+#include <semaphore.h>
 #include "config.h"
 #include "mems_signal_processing.h"
 
@@ -15,7 +16,7 @@ static fftw_complex cross_correlation[F_BUFFER_SIZE];
 static fftw_complex final_result[F_BUFFER_SIZE];
 static fftw_plan inverse_plan;
 
-volatile int ready_for_calculation = 1;
+static sem_t data_semaphore;
 
 void fft_initialize(){
     microphone_1_plan = fftw_plan_dft_1d(F_BUFFER_SIZE, microphone_1, microphone_1_fft, FFTW_FORWARD, FFTW_ESTIMATE);
@@ -29,6 +30,7 @@ void fft_initialize(){
         microphone_2[i][0] = 0; microphone_2[i][1] = 0;
     }
     printf("Microphone arrays set to zero\n");
+    sem_init(&data_semaphore,0,1);
 }
 
 static void cross_correlate(int n) { 
@@ -51,9 +53,10 @@ static void cross_correlate(int n) {
 }
 
 float calculate_angle(){
-    ready_for_calculation = 0;
+    sem_wait(&data_semaphore);
     fftw_execute(microphone_1_plan);// Calculate fft1
     fftw_execute(microphone_2_plan);// Calculate fft2
+    sem_post(&data_semaphore);
     cross_correlate(F_BUFFER_SIZE);
     fftw_execute(inverse_plan); // Calculate inverse
     int best_index = 0;
@@ -77,13 +80,18 @@ float calculate_angle(){
         return -1;
     }
     float angle = asin(delay * SPEED_OF_SOUND / MICROPHONE_DISTANCE_METERS);  // radians
-    ready_for_calculation = 1;
     return angle*CONVERSION_CONSTANT; //degrees
 }
 
 void load_data(int32_t* input_samples, int n){
-    for(int i = 0; i < n; i++){
-        microphone_1[i][0] = input_samples[i * 2];    
-        microphone_2[i][0] = input_samples[i * 2 + 1];
+    if(sem_trywait(&data_semaphore) == 0){
+        return;
+    }
+    else{
+        for(int i = 0; i < n; i++){
+            microphone_1[i][0] = input_samples[i * 2];    
+            microphone_2[i][0] = input_samples[i * 2 + 1];
+        }
+        sem_post(&data_semaphore);
     }
 }
