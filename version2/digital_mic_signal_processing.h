@@ -10,5 +10,6 @@ void f_stop_loop();
 int calculate_general_direction();
 void save_calculation_buffer();
 void get_full_buffer(Sample* sample_array);
-
+int switch_configure();
+int switch_get_value();
 #endif

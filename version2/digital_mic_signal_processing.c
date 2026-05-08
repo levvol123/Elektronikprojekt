@@ -17,6 +17,7 @@ static long interval;
 
 struct gpiod_chip *chip = NULL;
 struct gpiod_line_request *request = NULL; // v2: replaces gpiod_line_bulk
+static struct gpiod_line_request *switch_request = NULL;
 
 static void* f_loop();
 
@@ -46,8 +47,7 @@ int digital_mic_configure(int samplerate_hz) {
 	gpiod_line_settings_free(settings);
 	gpiod_line_config_free(line_cfg);
 	gpiod_request_config_free(req_cfg);
-
-	if (request == NULL) {
+	if (request == NULL || switch_configure() == 1) {
 		return 1;
 	}
 	printf("GIOD done\n");
@@ -62,6 +62,9 @@ void f_stop_loop(){
 }
 
 int calculate_general_direction(){
+    if(switch_get_value() == 1){
+        return 1;
+    }
     for (int i = 0; i < DIGITAL_MIC_BUFFER_SIZE; i++)
     {
         if(calculation_buffer[i].samples[0] == 1){
@@ -90,6 +93,42 @@ void get_full_buffer(Sample* sample_array){
         int second_chunk = current_head;
         memcpy(sample_array, &internal_circular_buffer[current_head], first_chunk * sizeof(Sample));
         memcpy(sample_array + first_chunk, &internal_circular_buffer[0], second_chunk * sizeof(Sample));
+    }
+}
+
+int switch_configure() {
+    unsigned int pin = SWITCH_PIN;
+
+    struct gpiod_line_settings *settings = gpiod_line_settings_new();
+    gpiod_line_settings_set_direction(settings, GPIOD_LINE_DIRECTION_INPUT);
+    gpiod_line_settings_set_bias(settings, GPIOD_LINE_BIAS_PULL_UP);
+
+    struct gpiod_line_config *line_cfg = gpiod_line_config_new();
+    gpiod_line_config_add_line_settings(line_cfg, &pin, 1, settings);
+
+    struct gpiod_request_config *req_cfg = gpiod_request_config_new();
+    gpiod_request_config_set_consumer(req_cfg, "Camera");
+
+    switch_request = gpiod_chip_request_lines(chip, req_cfg, line_cfg);
+    if(switch_request == NULL){
+        printf("Switch failed\n");
+        return 1;
+    }
+    gpiod_line_settings_free(settings);
+    gpiod_line_config_free(line_cfg);
+    gpiod_request_config_free(req_cfg);
+
+    return 0;
+}
+
+int switch_get_value(){
+    enum gpiod_line_value val = GPIOD_LINE_VALUE_INACTIVE;
+    gpiod_line_request_get_value(switch_request, SWITCH_PIN);
+    if(val == GPIOD_LINE_VALUE_INACTIVE){
+        return 0;
+    }
+    else{
+        return 1;
     }
 }
 
