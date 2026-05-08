@@ -64,7 +64,6 @@ void f_stop_loop(){
 int calculate_general_direction(){
     if(switch_get_value() == 1){
         return 1;
-        printf("Switch enabled\n");
     }
     for (int i = 0; i < DIGITAL_MIC_BUFFER_SIZE; i++)
     {
