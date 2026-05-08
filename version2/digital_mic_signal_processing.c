@@ -64,6 +64,7 @@ void f_stop_loop(){
 int calculate_general_direction(){
     if(switch_get_value() == 1){
         return 1;
+        printf("Switch enabled\n");
     }
     for (int i = 0; i < DIGITAL_MIC_BUFFER_SIZE; i++)
     {
@@ -101,7 +102,7 @@ int switch_configure() {
 
     struct gpiod_line_settings *settings = gpiod_line_settings_new();
     gpiod_line_settings_set_direction(settings, GPIOD_LINE_DIRECTION_INPUT);
-    gpiod_line_settings_set_bias(settings, GPIOD_LINE_BIAS_PULL_UP);
+    gpiod_line_settings_set_bias(settings, GPIOD_LINE_BIAS_PULL_DOWN);
 
     struct gpiod_line_config *line_cfg = gpiod_line_config_new();
     gpiod_line_config_add_line_settings(line_cfg, &pin, 1, settings);
@@ -122,9 +123,7 @@ int switch_configure() {
 }
 
 int switch_get_value(){
-    enum gpiod_line_value val = GPIOD_LINE_VALUE_INACTIVE;
-    gpiod_line_request_get_value(switch_request, SWITCH_PIN);
-    if(val == GPIOD_LINE_VALUE_INACTIVE){
+    if(gpiod_line_request_get_value(switch_request, SWITCH_PIN) == GPIOD_LINE_VALUE_INACTIVE){
         return 0;
     }
     else{
