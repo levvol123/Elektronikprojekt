@@ -1,0 +1,1 @@
+dependencies (ungefär) portaudio19-dev fftw3-dev libgpiod2.X libcurl 
